@@ -107,9 +107,10 @@ func getURL(w http.ResponseWriter, r *http.Request) {
 	//parse JSON
 	var tempLink link
 	body, _ := ioutil.ReadAll(r.Body)
+	log.Println("BODY", body)
 	err := json.Unmarshal([]byte(body), &tempLink)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("no :( ", err)
 	}
 	log.Println("BODY", tempLink.ShortURL)
 	longURL := lookupLongURL(tempLink.ShortURL)
@@ -117,7 +118,39 @@ func getURL(w http.ResponseWriter, r *http.Request) {
 		URL string `json:"URL"`
 	}
 	respT := resp{longURL}
-	jsonData, _ := json.Marshal(respT)
+	jsonData, err := json.Marshal(respT)
+	if err != nil {
+		fmt.Println("ugh ")
+		panic(err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+
+}
+
+// curl -X POST -H "Content-Type: application/json" -d '{"shortURL":"beZ"}' http://localhost:8080/ -i
+func postURL(w http.ResponseWriter, r *http.Request) {
+	log.Println("in postURL() function")
+	//parse JSON
+	var tempLink link
+	body, _ := ioutil.ReadAll(r.Body)
+	log.Println("BODY", body)
+	err := json.Unmarshal([]byte(body), &tempLink)
+	if err != nil {
+		fmt.Println("no :( ", err)
+	}
+	log.Println("BODY", tempLink.ShortURL)
+	longURL := lookupLongURL(tempLink.ShortURL)
+	type resp struct {
+		URL string `json:"URL"`
+	}
+	respT := resp{longURL}
+	jsonData, err := json.Marshal(respT)
+	if err != nil {
+		fmt.Println("ugh ")
+		panic(err)
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonData)
@@ -127,7 +160,7 @@ func getURL(w http.ResponseWriter, r *http.Request) {
 func apiHelper(w http.ResponseWriter, r *http.Request) {
 	log.Println("in apiHelper()")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Add("Access-Control-Allow-Methods", "PUT, GET")
+	w.Header().Add("Access-Control-Allow-Methods", "PUT, GET, POST")
 	//Access - Control - Allow - Headers
 	w.Header().Add("Access-Control-Allow-Headers", "content-type")
 	if r.Method == http.MethodPut {
@@ -136,8 +169,12 @@ func apiHelper(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == http.MethodGet {
 		log.Println("Get request")
 		getURL(w, r)
+	} else if r.Method == http.MethodPost {
+		log.Println("post request")
+		postURL(w, r)
 	} else {
 		log.Println("unsupported request type!")
+		w.WriteHeader(http.StatusOK)
 	}
 
 }

@@ -11,8 +11,26 @@ class Main extends React.Component {
       activeState: "",
       clicked: "",
       key: null,
-      myURL: window.location.href
+      myURL: window.location.href,
+      redirectURL: null
     };
+  }
+  componentDidMount(){
+    console.log("component mounted!!!")
+    //redirect check -- refactor into function ASAP
+    if(window.location.href !== "http://localhost:3000/"){
+      console.log("not equal -- redirecting...")
+      console.log(window.location.pathname)
+      //call func to lookup key, strip leading / first
+      //in func above^ return fullurl. hardcoded for now.
+
+      lookupURLFromKey(window.location.pathname,this)
+      if (this.state.redirectURL !== null){
+        console.log("i should be redirecrting now...")
+        window.location.href = this.state.redirectURL
+      }
+      //window.location.href = "http://google.com";
+    }
   }
     //this.handleClick.bind(this);
     //this.handleClick = this.handleClick.bind(this);
@@ -25,7 +43,7 @@ class Main extends React.Component {
     if (validURL(URL) === true) {
       console.log("Valid URL")
       this.setState({clicked: "True", activeState:"Valid URL"})
-      createNExecGetReq(document.getElementById("formURL").value,this)
+      createNExecPutReq(document.getElementById("formURL").value,this)
 
 
     } else{
@@ -51,7 +69,7 @@ class Main extends React.Component {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Learn React Dawg
+            Learn React
           </a>
 
           <Form>
@@ -83,7 +101,8 @@ function validURL(str) {
   return !!pattern.test(str);
 }
 
-function createNExecGetReq(url,self){
+//rename to putReq
+function createNExecPutReq(url,self){
   var data = {}
   data.longURL = url
   var json = JSON.stringify(data)
@@ -95,10 +114,42 @@ function createNExecGetReq(url,self){
     var z = await JSON.parse(req.responseText)
     console.log("inside body", z)
     //set state in here
-    self.setState({key: z.shortURL})
+    self.setState({key: "/"+z.shortURL})
   }
   req.send(json)
   
+}
+
+function lookupURLFromKey(key,self){
+  var keySplit = key.split("/");
+  console.log("key", keySplit[1])
+  createNExecGetReq(keySplit[1],self)
+  
+  
+}
+// post is acting as a get request with payload bc xmlhttpreq() doesn't send body on GET request
+function createNExecGetReq(key,self){
+  var data = {}
+  data.shortURL = key
+  var json = JSON.stringify(data)
+  var req = new XMLHttpRequest()
+  console.log("json payload:", json)
+  req.open("POST","http://localhost:8080/",true)
+  req.setRequestHeader('Content-Type','application/json')
+  req.onload = async () => {
+    console.log("response", req.response)
+    var jsonBody = await JSON.parse(req.responseText)
+    console.log("get json data:", jsonBody)
+    //set state below
+    // jsonBody.URL
+    //console.log(this,self)
+    self.setState({redirectURL: jsonBody.URL})
+    await new Promise(r => setTimeout(r, 2000));
+    window.location.href = jsonBody.URL
+    
+  }
+  req.send(json)
+
 }
 
 
