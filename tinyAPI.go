@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -48,8 +49,9 @@ func addURL(url string) int {
 	fmt.Println(queryString)
 	result, err := db.Query(queryString)
 	if err != nil {
-		log.Println("error in addURL")
-		panic(err)
+		log.Println("error in addURL query")
+		//panic(err)
+		return -1
 	}
 	defer result.Close()
 
@@ -79,6 +81,14 @@ func putURL(w http.ResponseWriter, r *http.Request) {
 	log.Println("BODY", tempLink.LongURL)
 	id := addURL(tempLink.LongURL)
 	log.Println("id for link:", id)
+	if id < 0 {
+		resp := link{"", "failed: id -1"}
+		jsonData, _ := json.Marshal(resp)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(jsonData)
+		return
+	}
 	shortURL := idToShortURL(id)
 	updateURL(id, shortURL, tempLink.LongURL)
 	var resp link
@@ -94,6 +104,7 @@ func putURL(w http.ResponseWriter, r *http.Request) {
 func lookupLongURL(shortURL string) string {
 	queryString := fmt.Sprintf("SELECT longURL from urls WHERE shortURL='%s';", shortURL)
 	result, _ := db.Query(queryString)
+	defer result.Close()
 	var resultStr string
 	result.Next()
 	result.Scan(&resultStr)
@@ -135,13 +146,14 @@ func postURL(w http.ResponseWriter, r *http.Request) {
 	//parse JSON
 	var tempLink link
 	body, _ := ioutil.ReadAll(r.Body)
-	log.Println("BODY", body)
+	log.Println("BODY 1", body)
 	err := json.Unmarshal([]byte(body), &tempLink)
 	if err != nil {
 		fmt.Println("no :( ", err)
 	}
-	log.Println("BODY", tempLink.ShortURL)
-	longURL := lookupLongURL(tempLink.ShortURL)
+	log.Println("BODY 2", tempLink.ShortURL)
+	longURL := lookupLongURL(tempLink.ShortURL) //
+	log.Println("lookup done")                  //
 	type resp struct {
 		URL string `json:"URL"`
 	}
@@ -192,10 +204,16 @@ func main() {
 	} else {
 		fmt.Println("db connected")
 	}
+	srv := &http.Server{
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 8 * time.Second,
+		Addr:         ":8080",
+	}
 
 	//note USE OF GO FUNCTION. listenandserve blocks execution!
 	go http.HandleFunc("/", apiHelper)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	//log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(srv.ListenAndServe())
 }
 
 func idToShortURL(id int) string {

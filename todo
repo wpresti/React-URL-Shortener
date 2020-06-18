@@ -2,3 +2,6 @@ https://stackoverflow.com/questions/52006335/how-to-change-display-onclick-in-re
 
 passing state example:
 https://stackoverflow.com/questions/44154760/passing-states-between-components
+
+to delete everything in table and restart index
+TRUNCATE TABLE someTable RESTART IDENTITY;

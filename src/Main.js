@@ -45,7 +45,6 @@ class Main extends React.Component {
       this.setState({clicked: "True", activeState:"Valid URL"})
       createNExecPutReq(document.getElementById("formURL").value,this)
 
-
     } else{
       //not valid URL
       console.log("not valid URL")
@@ -121,6 +120,7 @@ function createNExecPutReq(url,self){
 }
 
 function lookupURLFromKey(key,self){
+  console.log("in lookupURLFromKey()")
   var keySplit = key.split("/");
   console.log("key", keySplit[1])
   createNExecGetReq(keySplit[1],self)
@@ -144,7 +144,9 @@ function createNExecGetReq(key,self){
     // jsonBody.URL
     //console.log(this,self)
     self.setState({redirectURL: jsonBody.URL})
-    await new Promise(r => setTimeout(r, 2000));
+    //delay to fix redirect in middle of request being processed, thus causing database connection to not be closed.
+    await new Promise(r => setTimeout(r, 3000));
+    //jk just do this dont need to set state
     window.location.href = jsonBody.URL
     
   }
