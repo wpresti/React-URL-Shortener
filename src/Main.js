@@ -59,9 +59,9 @@ class Main extends React.Component {
         
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <p>
+          {/* <p>
             Edit <code>src/Main.js</code> and save to reload.
-          </p>
+          </p> */}
           <a
             className="App-link"
             href="https://reactjs.org"
@@ -78,7 +78,7 @@ class Main extends React.Component {
             </Form.Group>
           </Form>
 
-          <Button variant="primary" size="lg" onClick={this.handleClick}>Primary</Button>{' '}
+          <Button variant="primary" size="lg" onClick={this.handleClick}>Shorten Me!</Button>{' '}
           {/* <p> {this.state.activeState}</p> */}
         
 
@@ -144,8 +144,6 @@ function createNExecGetReq(key,self){
     // jsonBody.URL
     //console.log(this,self)
     self.setState({redirectURL: jsonBody.URL})
-    //delay to fix redirect in middle of request being processed, thus causing database connection to not be closed.
-    await new Promise(r => setTimeout(r, 3000));
     //jk just do this dont need to set state
     window.location.href = jsonBody.URL
     

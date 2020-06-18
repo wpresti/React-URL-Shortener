@@ -152,8 +152,8 @@ func postURL(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("no :( ", err)
 	}
 	log.Println("BODY 2", tempLink.ShortURL)
-	longURL := lookupLongURL(tempLink.ShortURL) //
-	log.Println("lookup done")                  //
+	longURL := lookupLongURL(tempLink.ShortURL)
+	log.Println("lookup done")
 	type resp struct {
 		URL string `json:"URL"`
 	}
@@ -217,7 +217,7 @@ func main() {
 }
 
 func idToShortURL(id int) string {
-	strmap := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	strmap := "QaSoEJnDPCTt9ONcXLRKuFmy6hMAGqr5Zflgi8BIw2zj4v70H3xeVbkY1sWpUd" //abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
 	shortURL := ""
 	for id > 0 {
 		shortURL += string(strmap[id%62])
@@ -229,7 +229,7 @@ func idToShortURL(id int) string {
 
 func shortURLtoID(shortURL string) int {
 	id := 0
-	strmap := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	strmap := "QaSoEJnDPCTt9ONcXLRKuFmy6hMAGqr5Zflgi8BIw2zj4v70H3xeVbkY1sWpUd"
 	for i, j := range reverse(shortURL) {
 		id += strings.Index(strmap, string(j)) * int(math.Pow(float64(62), float64(i)))
 	}
