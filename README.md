@@ -1,6 +1,18 @@
 # React-URL-Shortener
 A URL Shortener Web App with a Golang restAPI backend
 
+# Database Table Set Up
+
+
+CREATE TABLE urls(
+	id serial PRIMARY KEY,
+	shorturl TEXT,
+	longurl TEXT
+);
+
+# To remove all rows and reset primary key to 1
+TRUNCATE TABLE urls RESTART IDENTITY;
+
 # To Start Webapp
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
