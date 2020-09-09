@@ -1,5 +1,6 @@
 # React-URL-Shortener
-A URL Shortener Web App with a Golang restAPI backend
+A URL Shortener Web App with a Golang restAPI backend.
+Check it out: https://tinyurlgcp.netlify.app
 
 # Database Table Set Up
 
